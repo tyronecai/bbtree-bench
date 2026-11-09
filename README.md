@@ -68,3 +68,39 @@ REMOTE_HOST=192.168.1.8 REMOTE_DIR=/tmp/bbtree-kv-bench-build \
   记录 RSS，报告两者的差值；
 - 整个进程峰值 RSS：性能测试进程的 `VmHWM`，包含预生成 key 数组、map、
   运行时和分配器。
+
+## 性能结果
+
+| 操作 | bbtree ns/op | Rust BTreeMap | Abseil btree_map | C++ std::map |
+|---|---:|---:|---:|---:|
+| 写入全部 | 335.16 | 317.58 | **288.42** | 1073.65 |
+| 命中读取 | **291.36** | 359.58 | 297.82 | 1142.82 |
+| 未命中读取 | 69.33 | 45.90 | 60.23 | **16.60** |
+| 更新全部 | **281.55** | 362.55 | 305.13 | 1145.83 |
+| 删除一半 | 372.32 | 464.81 | **333.45** | 1466.28 |
+| 五阶段总计 | 1163.56 ms | 1318.01 ms | **1118.33 ms** | 4112.05 ms |
+
+相对 bbtree：
+
+- Rust BTreeMap 总耗时是 bbtree 的约 `1.13x`；
+- Abseil 总耗时是 bbtree 的约 `0.96x`；
+- C++ `std::map` 总耗时是 bbtree 的约 `3.53x`。
+
+## 内存结果
+
+| 实现 | map RSS 增量 | 每 entry | 整个进程峰值 RSS |
+|---|---:|---:|---:|
+| bbtree | 51.4 MiB | 53.9 B | 61.2 MiB |
+| Rust BTreeMap | 27.9 MiB | 29.3 B | 37.2 MiB |
+| Abseil btree_map | **21.8 MiB** | **22.8 B** | **31.7 MiB** |
+| C++ std::map | 61.2 MiB | 64.2 B | 70.9 MiB |
+
+在当前 `u64 -> u64` 场景中：
+
+- bbtree 的 map RSS 增量约为 Rust BTreeMap 的 `1.84x`；
+- bbtree 的 map RSS 增量约为 Abseil 的 `2.36x`；
+- bbtree 只比 C++ `std::map` 低约 16%。
+
+这与官网“30% lower memory usage”不能直接对应。官网内存测试使用 mimalloc
+和计数 allocator 测量 live heap；本测试使用系统 allocator 和 RSS，二者
+口径不同。但就进程实际驻留内存而言，bbtree 在该 workload 下没有优势。
