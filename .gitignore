@@ -1,0 +1,11 @@
+/target/
+/results/*.tsv
+/results/*.md
+!/results/.gitkeep
+!/results/latest.md
+!/results/latest.tsv
+!/results/memory-latest.tsv
+!/results/rust-fat-lto.tsv
+__pycache__/
+*.pyc
+

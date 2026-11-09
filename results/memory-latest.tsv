@@ -1,0 +1,5 @@
+implementation	map_type	count	map_rss_kb	process_peak_rss_kb
+bbtree	unsync::BBTreeMap	1000000	52596	62356
+std_btree	std::collections::BTreeMap	1000000	28572	38184
+absl_btree	absl::btree_map	1000000	22296	32388
+std_map	std::map	1000000	62684	72584
